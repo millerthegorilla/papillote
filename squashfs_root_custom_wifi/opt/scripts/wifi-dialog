@@ -8,10 +8,6 @@ for x in $(pgrep -f '(WIFI_LIST|PASS_DIALOG)'); do
   kill -9 ${x}
 done
 
-# kill -13 $(pgrep -f "gtkdialog --program=PASS_DIALOG")
-#kill -9 `ps | grep WIFI_LIST | grep -v grep | tr -s ' ' | sed -e 's/^ //g' | cut -d' ' -f1 | tr '\n' ' '` 2>/dev/null
-#kill -9 `ps | grep PASS_DIALOG | grep -v grep | tr -s ' ' | sed -e 's/^ //g' | cut -d' ' -f1 | tr '\n' ' '` 2>/dev/null
-
 # get screen size
 VSIZE=$(($(cat /sys/class/graphics/*/modes | sed 's/^.*x//' | sed 's/[a-zA-Z].*//') - 30))
 
