@@ -74,16 +74,8 @@ IFS=$'\n'; for x in ${SSIDS}; do
    BUTTONS="$BUTTONS $(echo -e "<button image-position=\"2\"; tooltip-text=\"$(echo ${x} |xargs)\"><input file icon=\"network-wired\"></input><label>$(echo ${x} | xargs)</label><action function=\"exit\">SSID=\"$(echo ${x}|xargs)\"</action></button>";)"
 done
 
-#echo $BUTTONS
-
-
 # Construct gtkdialog window for SSID list
 WIFI_LIST=$(echo "<window decorated=\"true\" title=\"Choose WIFI Network\" window-position=\"1\" icon-name=\"kiosk\" width-request=\"200\" height-request=\"${SIZE}\"><vbox scrollable=\"true\"><text width-request=\"100\" height-request=\"50\"><label>\"$(if [[ ! -z ${CONNECTED} ]]; then echo "Connected to ${WIFI_CONNECTION} via ${CONNECTED}"; else echo "Not connected!"; fi)\"</label></text>${BUTTONS}</vbox></window>")
-#echo $WIFI_LIST
-
-
-#WIFI_LIST=$(echo '<window decorated="true" title="Choose WIFI Network" window-position="1" icon-name="kiosk" width-request="200" height-request="454"><vbox scrollable="true"><text width-request="100" height-request="50"><label>"Connected to  jwifi wlan0 via  eth0 wlan0"</label></text><button image-position="2"; tooltip-text="jwifi"><input file icon="network-wired"></input><label>jwifi</label><action function="exit">SSID="jwifi"</action></button><button image-position="2"; tooltip-text="Flat 32"><input file icon="network-wired"></input><label>Flat 32</label><action function="exit">SSID="Flat 32"</action></button><button image-position="2"; tooltip-text="HUAWEI-B593-52BF"><input file icon="network-wired"></input><label>HUAWEI-B593-52BF</label><action function="exit">SSID="HUAWEI-B593-52BF"</action></button><button image-position="2"; tooltip-text="becca_wifi"><input file icon="network-wired"></input><label>becca_wifi</label><action function="exit">SSID="becca_wifi"</action></button><button image-position="2"; tooltip-text="becca_wifi"><input file icon="network-wired"></input><label>becca_wifi</label><action function="exit">SSID="becca_wifi"</action></button><button image-position="2"; tooltip-text="Anaconda1"><input file icon="network-wired"></input><label>Anaconda1</label><action function="exit">SSID="Anaconda1"</action></button><button image-position="2"; tooltip-text="Anaconda1_Wi-Fi5"><input file icon="network-wired"></input><label>Anaconda1_Wi-Fi5</label><action function="exit">SSID="Anaconda1_Wi-Fi5"</action></button></vbox></window>')
-#echo $WIFI_LIST
 
 export WIFI_LIST
 # Get chosen SSID name
@@ -143,7 +135,7 @@ killall wpa_supplicant && wpa_supplicant -B -i${IFACE} -c /etc/wpa_supplicant.co
 #bring interface up
 ifconfig ${IFACE} up
 
-sleep 10
+sleep 15
 
-fconfig ${IFACE} |grep inet && dunstify -u normal -i /usr/share/icons/oxygen/22x22/status/dialog-information.png "Connected to ${SSID} on ${IFACE}!" || dunstify -u normal -i /usr/share/icons/oxygen/22x22/status/dialog-warning.png "Failed to connect to ${SSID} on ${IFACE}!!!"
+ifconfig ${IFACE} |grep inet && dunstify -u normal -i /usr/share/icons/oxygen/22x22/status/dialog-information.png "Connected to ${SSID} on ${IFACE}!" || dunstify -u normal -i /usr/share/icons/oxygen/22x22/status/dialog-warning.png "Failed to connect to ${SSID} on ${IFACE}!!!"
 #job's a goodun.
