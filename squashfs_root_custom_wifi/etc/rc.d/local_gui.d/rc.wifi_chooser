@@ -1,0 +1,5 @@
+#!/bin/sh
+
+[ -f /tmp/found ] && . /tmp/found
+
+[ ! -z ${FOUND} ] && [ ${FOUND} != "true" ] && sh /opt/scripts/wifi_dialog

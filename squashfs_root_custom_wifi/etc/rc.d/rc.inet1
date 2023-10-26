@@ -1,0 +1,61 @@
+#!/bin/sh
+
+# Wait till required interface is up:
+#iface=none
+TRIES=10
+if [ "$iface"  ]; then
+    while [ $TRIES -gt 0 ]; do ls -1 /sys/class/net | grep -q $iface && break || { TRIES=$((TRIES-1)); sleep 1; }; done
+else
+    connection=wired
+    if [ "$connection" = wired ]; then
+	while [ $TRIES -gt 0 ]; do [ "$(iwconfig 2>&1 | grep 'no wireless extension' | grep -v lo | cut -d" " -f1 | sed '/^$/d')" ] && break || { TRIES=$((TRIES-1)); sleep 1; }; done
+    else
+	while [ $TRIES -gt 0 ]; do [ "$(iwconfig 2>/dev/null | cut -d" " -f1 | sed '/^$/d')" ] && break || { TRIES=$((TRIES-1)); sleep 1; }; done
+    fi
+fi
+
+IFACE=$(echo $(for dev in `ls /sys/class/net`; do
+    [ -d "/sys/class/net/$dev/wireless" ] && echo "$dev"
+done) |head -n1)
+
+for iface in $(ifconfig -a | sed 's/[ \t].*//;/^\(lo\|\)$/d'); do
+    ifconfig $iface up
+done
+
+IFS=$'\t';echo $(ifconfig -a | sed 's/[ \t].*//;/^\(lo\|\)$/d
+') | grep eth && dhcpcd
+
+sleep 2
+
+for i in $(echo $(ifconfig -a | sed 's/[ \t].*//;/^\(lo\|\)$/d') | grep eth); do
+  if [[ ifconfig $i |grep "inet" ]]; then
+     exit 0
+  fi
+done
+
+[ ! -f /opt/storage/wpa_conf ] && echo -e "$(grep ssid=\" /etc/wpa_supplicant.conf | sed 's/\t//')\n$(grep psk= /etc/wpa_supplicant.conf)" > /opt/storage/wpa_conf
+
+. /opt/storage/wpa_conf
+
+CONF=$(cat /opt/storage/wpa_conf)
+
+# save old wpa_supplicant.conf
+mv /etc/wpa_supplicant.conf /etc/wpa_supplicant.old
+
+# create new wpa_supplicant.conf
+cp /opt/scripts/wpa_supplicant.template /etc/wpa_supplicant.conf
+IFS=$' '; echo -e "${CONF}\n}" | tr -d '\t' >> /etc/wpa_supplicant.conf
+
+rfkill unblock all 2>/dev/null
+for nic in `iwconfig 2>/dev/null | cut -d" " -f1 | sed /^$/d | sort`; do
+ifconfig $nic up
+iwconfig $nic essid "${ssid}" 2>/dev/null
+wpa_supplicant -B -i$nic -c /etc/wpa_supplicant.conf -Dnl80211,wext > /dev/null 2>&1
+done
+for x in `ls -1 /sys/class/net | grep -v ^lo`; do
+dhcpcd -L -t 0 $x >/dev/null 2>&1 &
+done
+
+exit 0
+
+# Start networking:

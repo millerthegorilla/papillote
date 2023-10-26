@@ -1,0 +1,7 @@
+# requires blank line at end!!!
+ctrl_interface=/var/run/wpa_supplicant
+ctrl_interface_group=0
+eapol_version=1
+ap_scan=1
+network={
+scan_ssid=0

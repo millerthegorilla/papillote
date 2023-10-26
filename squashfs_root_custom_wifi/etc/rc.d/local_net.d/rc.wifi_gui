@@ -1,0 +1,37 @@
+#!/bin/sh
+
+# get current interface
+IFACE=$(echo $(for dev in `ls /sys/class/net`; do
+    [ -d "/sys/class/net/$dev/wireless" ] && echo "$dev"
+done) |head -n1)
+
+for iface in $(ifconfig -a | sed 's/[ \t].*//;/^\(lo\|\)$/d'); do
+    ifconfig $iface up
+done
+
+IFS=$'\t';echo $(ifconfig -a | sed 's/[ \t].*//;/^\(lo\|\)$/d
+') | grep eth && dhcpcd
+
+for i in $(echo $(ifconfig -a | sed 's/[ \t].*//;/^\(lo\|\)$/d') | grep eth); do
+  if [[ ifconfig $i |grep "inet" ]]; then
+     echo FOUND="true" > /tmp/found
+     exit 0
+  fi
+done
+
+# see if ssid is present - this might be better in local_net script
+LIST="$(iwlist ${IFACE} scanning | grep ESSID | grep -v \"\" | sed 's/ESSID:"//' | sed 's/"//')"
+
+# get current stored SSID
+. /opt/storage/wpa_conf
+
+# check if ssid is present in list
+FOUND=false
+for i in 1 2 3 4 5
+do
+        echo "${LIST}" | grep -wq "${ssid}"
+        [ $? == 0 ] && FOUND=true && break
+        sleep 2
+done
+
+echo FOUND="${FOUND}" > /tmp/found

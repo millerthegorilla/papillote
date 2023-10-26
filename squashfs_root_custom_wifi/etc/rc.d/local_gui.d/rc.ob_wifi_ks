@@ -1,0 +1,4 @@
+#!/bin/sh
+
+sed -i 's/<\/keyboard>/<!-- Open wifi chooser -->\n<keybind key="C-A-w">\n<action name="Execute">\n<command>sh \/opt\/scripts\/wifi-dialog<\/command>\n<\/action>\n<\/keybind>\n<\/keyboard>/' /etc/xdg/openbox/rc.xml
+openbox --reconfigure
